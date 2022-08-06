@@ -1,9 +1,9 @@
 const mongoose = require('../database/bd');
 
 const notaSchema = new mongoose.Schema({
-    titulo:{type:String,required: true},
-    comentario: String,
-    cor: String
+    title:{type:String,required: true},
+    text: String,
+    color: String
 });
 
 const Nota =mongoose.model('notas', notaSchema);

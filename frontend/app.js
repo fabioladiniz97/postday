@@ -17,13 +17,15 @@ class App{
         this.$colorTooltip = document.querySelector('#color-tooltip')
         this.addEventListeners()
         this.displayNotes()
+        this.listarNotes()
+        this.adicionarNotes()
     }
+//eventos de click
 
     addEventListeners(){
         document.body.addEventListener('click', event =>{
             console.log(event.path[0].id)
             this.handleFormClick(event)
-            //this.openModel(event)
             this.closeModal(event)
             if(event.path[2].id === 'notes'){
                 this.openModel(event)
@@ -45,7 +47,6 @@ class App{
         })
 
         document.body.addEventListener('mouseout', event =>{
-            //console.log("MOUSE OUT")
             this.closeTooltip(event)
             
         })
@@ -59,7 +60,6 @@ class App{
           })
 
         this.$form.addEventListener('submit', event => {
-            //console.log(event.path[0].id)
             event.preventDefault();
             const title = this.$noteTitle.value;
             const text = this.$noteText.value;
@@ -78,20 +78,14 @@ class App{
         const isFormClicked = this.$form.contains(event.target)
         const isCloseClicked = event.path[0].id==='form-close-button'
         
-        //console.log()
-        
-        
         if(isFormClicked){
             this.openForm()
         } else{
             this.closeForm( true)
         }
-        //console.log(isCloseClicked())
         if(isCloseClicked){
             this.closeForm(false)
         }
-
-        
     }
 
     openForm(){
@@ -150,11 +144,8 @@ class App{
     }
 
     openModel(event){
-        //console.log(event.target)
         if(event.target.closest('.note')){
-            //console.log("closes clicked")
             this.$modal.classList.toggle('open-modal')
-
         }
     }
 
@@ -167,7 +158,7 @@ class App{
             this.$modal.classList.toggle('open-modal')
         }
     }
-
+//seleciona uma nota 
     selectNote(event){
         console.log("select called")
         const $selectedNote = event.target.closest('.note')
@@ -179,23 +170,43 @@ class App{
         this.$modalText.value = text
     }
 
+    listarNotes(){
+        const url = 'http://localhost:3002/notas'
+        
+        fetch(url)
+        .then(response => response.json())
+        .then(notes =>{
+            
+            this.notes = notes//array
+            console.log('notes',notes)
+            this.displayNotes()
+ 
+        })
+    }
+    
+//adiciona notas
     addNotes(note){
         console.log("Adding notes", note.title, note.text)
-        const newNote ={
+        const newNote ={//objeto 
             title: note.title,
             text: note.text,
             color: 'white',
-            id: this.notes.length > 0 ? this.notes[this.notes.length - 1].id + 1 : 1
         }
 
-        this.notes.push(newNote)
-        console.log(this.notes)
-        this.displayNotes()
+        fetch("http://localhost:3002/notas",{
+            method:'POST',
+            headers:{
+                'accept':'application/json',
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify(newNote)
+        }).then(response =>{
+            this.listarNotes();
+        }).catch(error => alert('Falha ao Salvar'));
     }
 
+//edita notas
     editNotes() {
-        
-        //console.log("EDIT CALLED")
         
         const $title = this.$modalTitle.value
         const $text = this.$modalText.value
@@ -218,6 +229,8 @@ class App{
 
     }
 
+//deleta notas
+
     deleteNote(event){
         console.log("DELETE CALLED")
         console.log(event.target.closest('.note').dataset.id)
@@ -226,10 +239,13 @@ class App{
             //console.log($noteIdtoDelete)
             return (note.id != this.noteId)
         })
+
         console.log(this.notes)
         this.displayNotes()
     }
 
+    
+//editar cores
     editNoteColor(color){
         const $color = color
         this.notes = this.notes.map (note => {
@@ -238,10 +254,8 @@ class App{
                 //console.log("IF CALLED")
                 return {
                     ...note,
-                    color: $color
-                    
+                    color: $color            
                 }
-            
             }
             return note
         })
@@ -254,15 +268,13 @@ class App{
         const hasNotes = this.notes.length > 0
         this.$placeholder.style.display = hasNotes ? 'none' : 'flex';
 
-
         this.$notes.innerHTML = this.notes.map(note => `
         <div style="background: ${note.color};" class="note" data-id="${note.id}">
             <div class="${note.title && 'note-title'}">${note.title}</div>
             <div class="note-text">${note.text}</div>
             <div class="toolbar-container">
             <div class="toolbar">
-                
-                
+                                
                 <svg class="toolbar-color" data-id=${note.id} xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                 </svg>
@@ -274,7 +286,6 @@ class App{
             </div>
         </div>
         `).join("");
-
     }
 }
 
