@@ -3,7 +3,7 @@ const Nota = require('../models/nota');
 //Vai testar se existem notas, pegando o tamanho
 const buscarNota = async (request, response) =>{
     const notas = await Nota.find({})
-    if(notas.length > 0){
+    if(notas.length >= 0){
         response.status(200).send(notas);
     }else{
         response.status(400).send('Nota não encontrada');
@@ -32,11 +32,10 @@ const deletarNota = async (request, response) =>{
 
 //Vai atualizar a nota pegando o id fazendo a requisição para o body
 const atualizarNota = async (request, response) =>{
-    const result = await Nota.updateOne({_id: request.body.id },{
+    const result = await Nota.updateOne({_id: request.body._id },{
         $set: {
-            titulo: request.body.titulo,//params
-            cor: request.body.cor,//params
-            comentario: request.body.comentario//params
+            title: request.body.title,//params
+            text: request.body.text//params
         }
     });
 

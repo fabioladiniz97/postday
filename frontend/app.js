@@ -14,11 +14,10 @@ class App{
         this.$modalTitle = document.querySelector('.modal-title')
         this.$modalText = document.querySelector('.modal-text')
         this.$modalCloseButton = document.querySelector('.modal-close-button')
-        this.$colorTooltip = document.querySelector('#color-tooltip')
         this.addEventListeners()
         this.displayNotes()
         this.listarNotes()
-        this.adicionarNotes()
+
     }
 //eventos de click
 
@@ -51,13 +50,6 @@ class App{
             
         })
 
-        this.$colorTooltip.addEventListener('mouseover', function() {
-            this.style.display = 'flex';  
-          })
-          
-          this.$colorTooltip.addEventListener('mouseout', function() {
-             this.style.display = 'none'; 
-          })
 
         this.$form.addEventListener('submit', event => {
             event.preventDefault();
@@ -163,11 +155,9 @@ class App{
         console.log("select called")
         const $selectedNote = event.target.closest('.note')
         const [$noteTitle, $noteText] = $selectedNote.children
-        this.noteId = Number($selectedNote.dataset.id)
-        const {title, text} = this.notes[this.noteId -1]
-        console.log(title, text)
-        this.$modalTitle.value = title
-        this.$modalText.value = text
+        this.noteId = $selectedNote.dataset.id
+        this.$modalTitle.value = $noteTitle.outerText
+        this.$modalText.value = $noteText.outerText
     }
 
     listarNotes(){
@@ -208,25 +198,30 @@ class App{
 //edita notas
     editNotes() {
         
-        const $title = this.$modalTitle.value
-        const $text = this.$modalText.value
-        this.notes = this.notes.map (note => {
-            console.log(typeof(this.noteId), typeof(note.id), this.noteId == note.id)
-            if (note.id === this.noteId){
-                
-                return {
-                    ...note,
-                    title: $title,
-                    text: $text
-                    
-                }
+        const title = this.$modalTitle.value
+        const text = this.$modalText.value
+        const id = this.noteId
+        const color = 'white'
+
+        const editNote ={
+            _id: id,
+            title: title,
+            text: text,
+            color: 'white',
+        }
+        
+        fetch("http://localhost:3002/notas",{
+            method: 'PUT',
+            headers:{
+                'accept':'application/json',
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify(editNote)
+        }).then(response =>{
+            alert('Editado com Sucesso')
+            this.listarNotes();
+        }).catch(error =>alert('Falha ao Edita'));
             
-            }
-            return note
-        })
-
-        this.displayNotes()
-
     }
 
 //deleta notas
@@ -235,33 +230,19 @@ class App{
         console.log("DELETE CALLED")
         console.log(event.target.closest('.note').dataset.id)
         this.noteId = event.target.closest('.note').dataset.id
-        this.notes = this.notes.filter(note => {
-            //console.log($noteIdtoDelete)
-            return (note.id != this.noteId)
-        })
-
-        console.log(this.notes)
-        this.displayNotes()
-    }
-
     
-//editar cores
-    editNoteColor(color){
-        const $color = color
-        this.notes = this.notes.map (note => {
-            console.log(typeof(this.noteId), typeof(note.id), this.noteId == note.id, $color)
-            if (note.id == this.noteId){
-                //console.log("IF CALLED")
-                return {
-                    ...note,
-                    color: $color            
-                }
-            }
-            return note
-        })
-        //console.log(this.notes)
-        this.displayNotes()
+        fetch(`http://localhost:3002/notas/${this.noteId}`,{
+            method:'DELETE',
+            headers:{
+                'accept':'application/json',
+                'Content-Type':'application/json'
+            },
+        }).then(response =>{
+            this.listarNotes();
+            alert('Deletado com Sucesso');
+        }).catch(error => alert('Falha ao Deletar'));
     }
+
 
     displayNotes(){
         console.log(this.notes)
@@ -269,16 +250,12 @@ class App{
         this.$placeholder.style.display = hasNotes ? 'none' : 'flex';
 
         this.$notes.innerHTML = this.notes.map(note => `
-        <div style="background: ${note.color};" class="note" data-id="${note.id}">
+        <div style="background: ${note.color};" class="note" data-id="${note._id}">
             <div class="${note.title && 'note-title'}">${note.title}</div>
             <div class="note-text">${note.text}</div>
             <div class="toolbar-container">
             <div class="toolbar">
-                                
-                <svg class="toolbar-color" data-id=${note.id} xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                
+
                 <svg class="toolbar-delete" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
