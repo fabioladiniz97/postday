@@ -12,6 +12,7 @@ const buscarNota = async (request, response) =>{
 
 //Vai adicionar nota mandando uma requisição para o body onde tem todos os params(Titulo,comentario e cor)
 const addNota = async (request, response) =>{
+
     const nota = new Nota(request.body);
     nota.save().then(()=>{
         response.status(200).send('Salvo com Sucesso');
@@ -22,6 +23,7 @@ const addNota = async (request, response) =>{
 
 //vai deletar a nota, ele procura a nota pelo id(paramentro)
 const deletarNota = async (request, response) =>{
+
     const result = await Nota.deleteOne({_id:request.params.id});
     if(result.deletedCount > 0){
         response.status(200).send('Removido com sucesso');
@@ -31,7 +33,8 @@ const deletarNota = async (request, response) =>{
 };
 
 //Vai atualizar a nota pegando o id fazendo a requisição para o body
-const atualizarNota = async (request, response) =>{   
+const atualizarNota = async (request, response) =>{  
+     
     const result = await Nota.updateOne({_id: request.body._id },{
         $set: {
             title: request.body.title,//params
