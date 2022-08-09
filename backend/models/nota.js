@@ -1,3 +1,4 @@
+
 const mongoose = require('../database/bd');
 
 const notaSchema = new mongoose.Schema({
