@@ -195,6 +195,7 @@ class App{
         }).catch(error => alert('Falha ao Salvar'));
     }
 
+
 //edita notas
     editNotes() {
         
